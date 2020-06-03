@@ -65,7 +65,9 @@ def _crop_to_shape(img, layout_shape):
 img = io.imread('assets/uEye_Image_000827.png')
 img = img_as_ubyte(transform.rescale(img, 0.5))
 
-fig = make_figure(img)
+img_displayed = img
+
+fig = make_figure(img_displayed)
 fig.update_layout(dragmode='drawrect')
 
 app = dash.Dash(__name__)
@@ -82,6 +84,7 @@ app.layout = html.Div(children=[
         html.Button('Crop to rectangle', id='crop-button'),
         html.Button('Back to original shape', id='back-button'),
         html.Button('Find contour', id='contour-button'),
+        html.Button('Measure surface tension', id='measure-button'),
         html.H3('Model parameters'),
         html.H5('Image scale (px/mm)'),
         dcc.Input(id='input-img_scale', type='number', value=100),
@@ -108,26 +111,33 @@ def store_rectangle(fig_data):
      dash.dependencies.Input('back-button', 'n_clicks'),
      dash.dependencies.Input('contour-button', 'n_clicks')
      ],
-    [dash.dependencies.State('store', 'data')])
+    [dash.dependencies.State('store', 'data'),
+    ])
 def update_figure(click_crop, click_back, click_contour, shape_data):
-    if click_back is None and click_crop is None:
-        return dash.no_update, dash.no_update
-    else:
-        ctx = dash.callback_context
-        button_id = ctx.triggered[0]['prop_id'].split('.')[0]
-        print(button_id)
-        contour = None
-        if button_id == 'crop-button':
-            img_crop = _crop_to_shape(img, shape_data)
-            new_store_data = dash.no_update
-        elif button_id == 'back-button':
-            img_crop = img
-        else: # contour-button
-            img_crop = _crop_to_shape(img, shape_data)
-            img_crop, contour = _find_contour(img_crop)
-        fig = make_figure(img_crop)
-        fig.update_layout(dragmode='drawrect')
-        return fig, contour
+    global img_displayed
+
+    #if click_back is None and click_crop is None:
+    #    return dash.no_update, dash.no_update
+    #else:
+
+    ctx = dash.callback_context
+    button_id = ctx.triggered[0]['prop_id'].split('.')[0]
+    print(button_id)
+    contour = None
+    if button_id == 'crop-button':
+        img_displayed = _crop_to_shape(img, shape_data)
+        new_store_data = dash.no_update
+    elif button_id == 'back-button':
+        img_displayed = img
+    elif button_id == 'contour-button':
+        img_crop = _crop_to_shape(img_displayed, shape_data)
+        img_displayed, contour = _find_contour(img_crop)
+    elif button_id == 'measure-button':
+        # Do something
+        pass
+    fig = make_figure(img_displayed)
+    fig.update_layout(dragmode='drawrect')
+    return fig, contour
 
 
 if __name__ == '__main__':
