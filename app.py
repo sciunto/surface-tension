@@ -83,8 +83,12 @@ app.layout = html.Div(children=[
         html.Button('Back to original shape', id='back-button'),
         html.Button('Find contour', id='contour-button'),
         html.H3('Model parameters'),
-        html.H5('Parameter 1'),
-        dcc.Input(id='input-param1', type='number', value=0)
+        html.H5('Image scale (px/mm)'),
+        dcc.Input(id='input-img_scale', type='number', value=100),
+        html.H5('Min surface tension (mN/m)'),
+        dcc.Input(id='input-min_surface_tension', type='number', value=10),
+        html.H5('Max surface tension (mN/m)'),
+        dcc.Input(id='input-max_surface_tension', type='number', value=80),
         ], style={'width':'45%'}),
         ])
 
