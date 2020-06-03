@@ -14,8 +14,8 @@ from dash_canvas.utils import array_to_data_url
 
 def make_figure(img_array):
     img_uri = array_to_data_url(img_array)
-    width = img.shape[1]
-    height = img.shape[0]
+    width = img_array.shape[1]
+    height = img_array.shape[0]
     fig = go.Figure()
     # Add trace
     fig.add_trace(
