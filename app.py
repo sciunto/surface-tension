@@ -14,8 +14,7 @@ from dash_canvas.utils import array_to_data_url
 
 def make_figure(img_array):
     img_uri = array_to_data_url(img_array)
-    width = img_array.shape[1]
-    height = img_array.shape[0]
+    height, width = img_array.shape[0], img_array.shape[1]
     fig = go.Figure()
     # Add trace
     fig.add_trace(
@@ -46,6 +45,14 @@ def make_figure(img_array):
     fig.update_yaxes(showgrid=False)
     return fig
 
+
+def _find_contour(img):
+    threshold = filters.threshold_otsu(img)
+    mask = img < threshold
+    mask = ndimage.binary_fill_holes(mask)
+    img = img_as_ubyte(segmentation.mark_boundaries(img, mask, mode='thick'))
+    contour = np.nonzero(mask)
+    return img, contour
 
 def _crop_to_shape(img, layout_shape):
     if layout_shape is None:
@@ -113,11 +120,7 @@ def update_figure(click_crop, click_back, click_contour, shape_data):
             img_crop = img
         else: # contour-button
             img_crop = _crop_to_shape(img, shape_data)
-            threshold = filters.threshold_otsu(img_crop)
-            mask = img_crop < threshold
-            mask = ndimage.binary_fill_holes(mask)
-            img_crop = img_as_ubyte(segmentation.mark_boundaries(img_crop, mask, mode='thick'))
-            contour = np.nonzero(mask)
+            img_crop, contour = _find_contour(img_crop)
         fig = make_figure(img_crop)
         fig.update_layout(dragmode='drawrect')
         return fig, contour
